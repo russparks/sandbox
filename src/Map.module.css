@@ -1,0 +1,33 @@
+.container { position: relative; width: 100%; height: 100%; }
+.callout {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  bottom: 35px; /* ~35px above icon */
+  left: 50%;
+  background: #f3f4f6;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+.calloutLead {
+  background: #ffffff;
+  color: #111111;
+}
+.tail {
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #e5e7eb;
+}
+.iconWrap { width: 28px; height: 28px; transform: translate(-50%, 0); position: absolute; left:50%; bottom:0; }
+.icon { width: 28px; height: 28px; display:block; }

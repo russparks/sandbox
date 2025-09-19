@@ -1,0 +1,38 @@
+[
+  {
+    "name"    : "Alan Domville",
+    "postcode": "HD9 4BW",
+    "role"    : "SPM",
+    "project" : "Mabgate"
+  },
+  {
+    "name"    : "Charlie Bagnall",
+    "postcode": "WF4 6AW",
+    "role"    : "SPM",
+    "project" : "George"
+  },
+  {
+    "name"    : "Andy Storrs",
+    "postcode": "DN4 1ST",
+    "role"    : "SPM",
+    "project" : "Park Hill"
+  },
+  {
+    "name"    : "John Smith",
+    "postcode": "yo8 3bb",
+    "role"    : "SPM",
+    "project" : "Dakota"
+  },
+  {
+    "name"    : "Mick Spells",
+    "postcode": "WF7 5JP",
+    "role"    : "PM",
+    "project" : "Foss Island"
+  },
+  {
+    "name"    : "David Fish",
+    "postcode": "DN17 2QY",
+    "role"    : "PM",
+    "project" : "Freshney"
+  }
+]

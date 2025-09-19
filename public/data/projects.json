@@ -1,0 +1,24 @@
+[
+  {"name": "Mabgate", "postcode": "LS9 7SW", "construction": "", "spare": ""},
+  {"name": "George", "postcode": "HD1 1JF", "precon": "", "spare": ""},
+  {"name": "Park Hill", "postcode": "S2 5PN", "precon": "", "spare": ""},
+  {"name": "Dakota", "postcode": "YO1 6HU", "precon": "", "spare": ""},
+  {
+    "name"        : "Foss Island",
+    "postcode"    : "YO10 3DJ",
+    "construction": "",
+    "spare"       : ""
+  },
+  {
+    "name"        : "Freshney",
+    "postcode"    : "DN31 1ED",
+    "construction": "",
+    "spare"       : ""
+  },
+  {"name": "Village", "postcode": "S8 8BW", "precon": "", "spare": ""},
+  {"name": "Ferrybridge", "postcode": "WF11 8DX", "precon": "", "spare": ""},
+  {"name": "Thorpe Park", "postcode": "LS15 8GG", "precon": "", "spare": ""},
+  {"name": "Moxy", "postcode": "HU1 2DA", "precon": "", "spare": ""},
+  {"name": "GMI Leeds", "postcode": "LS11 5UH", "permanent": "", "spare": ""},
+  {"name": "LeMond", "postcode": "DN40 3DX", "precon": "", "spare": ""}
+]
