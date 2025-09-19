@@ -20,7 +20,12 @@ type MarkerWrapper = {
 
 export function MapView({ projects, leads, showProjects, showLeads }: Props) {
   const mapRef = useRef<HTMLDivElement | null>(null)
-  const stateRef = useRef<{ map?: google.maps.Map, markers: MarkerWrapper[], geocoder?: google.maps.Geocoder }>({ markers: [] })
+  const stateRef = useRef<{
+    map?: google.maps.Map
+    markers: MarkerWrapper[]
+    geocoder?: google.maps.Geocoder
+    advancedMarker?: typeof google.maps.marker.AdvancedMarkerElement
+  }>({ markers: [] })
 
   useEffect(() => {
     let cancelled = false
@@ -44,7 +49,7 @@ export function MapView({ projects, leads, showProjects, showLeads }: Props) {
         libraries: ['marker', 'geocoding', 'places'],
       })
       const { Map } = await loader.importLibrary('maps')
-      const { AdvancedMarkerElement, CollisionBehavior } = (await loader.importLibrary('marker')) as google.maps.MarkerLibrary
+      const { AdvancedMarkerElement } = (await loader.importLibrary('marker')) as google.maps.MarkerLibrary
 
       if (cancelled || !mapRef.current) return
 
@@ -58,7 +63,24 @@ export function MapView({ projects, leads, showProjects, showLeads }: Props) {
       })
       stateRef.current.map = map
       stateRef.current.geocoder = new google.maps.Geocoder()
+      stateRef.current.advancedMarker = AdvancedMarkerElement
 
+    })()
+
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    const map = stateRef.current.map
+    const geocoder = stateRef.current.geocoder
+    if (!map || !geocoder) return
+
+    let cancelled = false
+
+    clearMarkers(stateRef.current.markers)
+    stateRef.current.markers = []
+
+    ;(async () => {
       const bounds = new google.maps.LatLngBounds()
       const allPoints: {type:'project'|'lead'; name:string; postcode:string; status?:Project['status']}[] = [
         ...projects.map(p=>({type:'project' as const, name:p.name, postcode:p.postcode, status:p.status})),
@@ -66,7 +88,10 @@ export function MapView({ projects, leads, showProjects, showLeads }: Props) {
       ]
 
       for (const item of allPoints) {
-        const loc = await geocodePostcode(stateRef.current.geocoder!, item.postcode)
+        if (cancelled) return
+
+        const loc = await geocodePostcode(geocoder, item.postcode)
+        if (cancelled) return
         if (!loc) { console.warn('No geocode result for', item.postcode, item.name); continue }
         bounds.extend(loc)
 
@@ -96,12 +121,13 @@ export function MapView({ projects, leads, showProjects, showLeads }: Props) {
 
         let marker: google.maps.marker.AdvancedMarkerElement | google.maps.Marker
         try {
+          const AdvancedMarkerElement = stateRef.current.advancedMarker
           if (AdvancedMarkerElement) {
             marker = new AdvancedMarkerElement({
               position: loc,
               map,
               content: container,
-              collisionBehavior: CollisionBehavior.REQUIRED,
+              collisionBehavior: google.maps.CollisionBehavior?.REQUIRED,
             })
           } else {
             throw new Error('AdvancedMarker unavailable')
@@ -116,29 +142,56 @@ export function MapView({ projects, leads, showProjects, showLeads }: Props) {
 
         stateRef.current.markers.push({ type: item.type, marker, labelEl: label })
       }
-      if (!bounds.isEmpty()) {
-        map.fitBounds(bounds, 60)
+
+      if (!cancelled) {
+        if (!bounds.isEmpty()) {
+          map.fitBounds(bounds, 60)
+        }
+        updateMarkerVisibility(stateRef.current.markers, map, showProjects, showLeads)
       }
     })()
 
-    return () => { cancelled = true }
-  }, [])
+    return () => {
+      cancelled = true
+      clearMarkers(stateRef.current.markers)
+      stateRef.current.markers = []
+    }
+  }, [projects, leads])
 
   useEffect(() => {
     const map = stateRef.current.map
-    for (const m of stateRef.current.markers) {
-      const isVisible = (m.type==='project' ? showProjects : showLeads)
-      if ('map' in m.marker) {
-        // @ts-ignore
-        m.marker.map = isVisible ? map : null
-      } else {
-        (m.marker as google.maps.Marker).setMap(isVisible ? map! : null)
-      }
-      if (m.labelEl) m.labelEl.style.display = isVisible ? '' : 'none'
-    }
+    if (!map) return
+    updateMarkerVisibility(stateRef.current.markers, map, showProjects, showLeads)
   }, [showProjects, showLeads])
 
   return <div ref={mapRef} className="map" />
+}
+
+function clearMarkers(markers: MarkerWrapper[]) {
+  for (const m of markers) {
+    if ('setMap' in m.marker) {
+      m.marker.setMap(null)
+    } else {
+      m.marker.map = null
+    }
+    if (m.labelEl) {
+      m.labelEl.remove()
+    }
+  }
+}
+
+function updateMarkerVisibility(markers: MarkerWrapper[], map: google.maps.Map, showProjects: boolean, showLeads: boolean) {
+  for (const m of markers) {
+    const isVisible = m.type === 'project' ? showProjects : showLeads
+    if ('setMap' in m.marker) {
+      m.marker.setMap(isVisible ? map : null)
+    } else {
+      m.marker.map = isVisible ? map : null
+    }
+    if (m.labelEl) {
+      m.labelEl.style.display = isVisible ? '' : 'none'
+    }
+  }
 }
 
 async function geocodePostcode(
